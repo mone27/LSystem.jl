@@ -1,0 +1,7 @@
+name = "LSystem"
+uuid = "7b941c22-e9aa-4989-a5ef-e8271042bb8e"
+authors = ["mone27 <massaro.simone.it@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
