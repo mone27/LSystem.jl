@@ -34,9 +34,6 @@ times
 # ╔═╡ 6f45bd3e-bc4b-4197-9392-cfc74f18421d
 plot_l_system("M(-300) F(30) A", rules, times)
 
-# ╔═╡ cdda1f35-4c5f-4f78-904e-6023ca50f806
-LTurtle()
-
 # ╔═╡ 1fbf2b2a-af0c-4e7d-8b0a-db4f03d1c4ad
 rules2 = Dict(
 	"A" => "LMul(.85) [ LMul(.6) T(40) F(50) B ] F(70) B",
@@ -66,6 +63,9 @@ times3
 # ╔═╡ eb3e5ece-f7e0-4999-b5b7-e720c15c34da
 plot_l_system("M(-300) Col(0,.4,0.1) F(30) A B", rules3, times3, write_text=false)
 
+# ╔═╡ 2684ef26-c458-4dee-8ac8-736b3aafc007
+rules3
+
 # ╔═╡ Cell order:
 # ╠═f1dabadc-87be-42b7-b1e8-5f27a7818728
 # ╠═e9ae675b-c499-4060-ad4f-dbe2270ec58e
@@ -73,7 +73,6 @@ plot_l_system("M(-300) Col(0,.4,0.1) F(30) A B", rules3, times3, write_text=fals
 # ╠═5bcc3fbf-1c9b-4007-877b-bad8b06f337e
 # ╟─69326372-61d1-45a6-b270-1c29740f7fa4
 # ╠═6f45bd3e-bc4b-4197-9392-cfc74f18421d
-# ╠═cdda1f35-4c5f-4f78-904e-6023ca50f806
 # ╠═1fbf2b2a-af0c-4e7d-8b0a-db4f03d1c4ad
 # ╠═7ed53d6a-6657-423e-be9d-8093414adca9
 # ╟─9a9fb7f6-0d64-4fe6-bfff-898923967ef7
@@ -82,3 +81,4 @@ plot_l_system("M(-300) Col(0,.4,0.1) F(30) A B", rules3, times3, write_text=fals
 # ╠═c696cc8d-fa46-4883-a1ad-d9e87bec7107
 # ╠═30a489f9-f10c-4917-9597-585aec3bc319
 # ╠═eb3e5ece-f7e0-4999-b5b7-e720c15c34da
+# ╠═2684ef26-c458-4dee-8ac8-736b3aafc007

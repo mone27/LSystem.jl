@@ -4,12 +4,24 @@ using Luxor, Lazy
 
 import Luxor: Reposition, Forward, Turn, Push, Pop, Message, Pencolor
 
-export l_system, plot_turtle, plot_l_system, LTurtle
+export l_system, plot_turtle, plot_l_system, LTurtle, f_rule
 
-function l_system_pass(seq::Vector{<:AbstractString}, rules)
+function l_system_pass(seq::Vector{<:Any}, rules)
 	new_seq = map(seq) do el
-		if haskey(rules, el)
-			return rules[el]
+		if occursin("(", el) # This is an element with arguments
+            (rule, args) = match(r"(.+)\((.+)\)", el).captures #extracts rules name
+            rule_name = rule * "()"
+            if haskey(rules, rule_name)
+                args = split(args, ",")
+                args = Meta.parse.(args) # TODO this is duplicate code
+                args = eval.(args)
+                return rules[rule * "()"](args...)
+            else
+                return [el]
+            end
+
+        elseif haskey(rules, el) # simple match without arguments
+			return rules[el]()
 		else
 			return [el]
 		end
@@ -17,17 +29,59 @@ function l_system_pass(seq::Vector{<:AbstractString}, rules)
 	return collect(Iterators.flatten(new_seq))
 end
 
+""" Convert a dict of strings to a dict of functions"""
+function to_rules(rules::Dict)
+    new_rules = Dict()
+    for key in keys(rules) # splits into an array all the rules
+        new_key, rule = to_f_rule(key, rules[key])
+        new_rules[new_key] = rule
+    end 
+    rules = new_rules
+end
+
+
+""" Convert a string to a function"""
+function to_f_rule_args(key, rules)
+    rules = split(rules, " ")
+
+    (rule_name, args_names) = match(r"(.+)\((.+)\)", key).captures
+    args_names = split(args_names, ",")
+    
+    function rule_func(fargs...)
+        rules = map(rules) do rule
+            return replace_arguments(rule, args_names, fargs)
+        end
+        return rules
+    end
+
+    return (rule_name * "()", rule_func)
+end
+
+
+function to_f_rule(key, rules)
+    if occursin("(", key) # this is a rules with arguments
+        return to_f_rule_args(key, rules)
+    else 
+        rules = split(rules, " ")
+        rule_func = () -> rules
+        return (key, rule_func)
+    end
+end
+
+function replace_arguments(rule, args_names, args)
+    for (name, arg) in zip(args_names, args)
+        rule = replace(rule, name => arg)
+    end
+    return rule
+end
+
 """
 entry function for the L-l_system
 """
 function l_system(start_seq::String, rules::Dict, times::Integer)
-    seq = split(start_seq, " ")
-    new_rules = Dict()
-    for key in keys(rules) # splits into an array all the rules
-        new_rules[key] = split(rules[key], " ")
-    end 
-    rules = new_rules
+    seq = String.(split(start_seq, " "))
 
+    rules = to_rules(rules)
     for i in 1:times
         seq = l_system_pass(seq, rules)
     end
@@ -74,10 +128,12 @@ end
 function turtle_step(t, step; write_text = true)
     try
         if occursin("(", step) # This is a step with arguments
-            (instr, arg) = match(r"(.+)\((.+)\)", step).captures
-            arg = split(arg, ",")
-            arg = parse.(Float64, arg)
-            instructions[instr * "()"](t, arg...)
+            (instr, args) = match(r"(.+)\((.+)\)", step).captures
+            args = split(args, ",")
+            args = Meta.parse.(args)
+            args = eval.(args)
+
+            instructions[instr * "()"](t, args...)
         else
             instructions[step](t)
         end
@@ -110,11 +166,18 @@ instructions = Dict(
     "RMul()" => (t, a) -> t.turtle.orientation *= a, # Multiply rotation by coefficient
     "LMul()" => (t, a) -> t.len *= a, # Multiply len by coefficient
     "Col()" => Pencolor, # Accepts 3 args in rgb to change the color
-    "CMul()" =>  
     "M()" => Move, # Move without writing
     "[" => Push, # save current turtle status
     "]" => Pop # restore turtle status,
 )
+
+
+# F(t, d) = Forward(t, t.len * d)
+# LMul(t, a) =  t.len *= a
+# Col(t, r, g, b) = Pencolor(t, r, g, b)
+# M(t, d) = Move(t, d)
+
+
 
 function plot_l_system(seq, rules, times; t= LTurtle(), write_text=true)
     seq = l_system(seq, rules, times)
